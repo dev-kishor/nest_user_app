@@ -19,10 +19,3 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)
-
-
-// export const User = new mongoose.Schema({
-//   name: String,
-//   email: String,
-//   password: String
-// })

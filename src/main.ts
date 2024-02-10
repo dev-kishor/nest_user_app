@@ -25,7 +25,7 @@ async function bootstrap() {
   app.useGlobalFilters(new ValidationExceptionFilter());
 
   // PreFix to all api endpoint means all point will start with localhost:port/api/vi
-  app.setGlobalPrefix('api/v1');
+  // app.setGlobalPrefix('api/v1');
 
   const configService = app.get(ConfigService);
   const port: number = configService.get<number>('PORT', 8080);
