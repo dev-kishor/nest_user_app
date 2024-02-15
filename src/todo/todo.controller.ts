@@ -8,6 +8,9 @@ import {
   HttpException,
   HttpStatus,
   Res,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
@@ -15,6 +18,9 @@ import { UpdateTodoDto } from './dto/update-todo.dto';
 import { ConfigService } from '@nestjs/config';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import * as path from 'path';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
+import * as mimeTypes from 'mime-types';
 
 @ApiTags('Controller_Todo')
 @Controller('/todo')
@@ -25,12 +31,13 @@ export class TodoController {
   ) {}
 
   @Get('all-logs')
-  async allLogs(@Res() res: any) {
+  async allLogsAndDwlndFile(@Res() res: any) {
     try {
-      const logFile = await this.todoService.getRelease();
-      const filePath = path.resolve(logFile);
-      const file_name = this.configService.get("DB_LOG_FILE")
-      res.download(filePath, file_name);
+      const logFile = await this.todoService.getAllLogsInFile().then((data) => {
+        const filePath = path.resolve(data);
+        const file_name = this.configService.get('DB_LOG_FILE');
+        res.download(filePath, file_name);
+      });
     } catch (error) {
       throw new HttpException(
         {
@@ -39,6 +46,32 @@ export class TodoController {
         },
         HttpStatus.FORBIDDEN,
       );
+    }
+  }
+
+  @Post('read-all-logs')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadLogFile(@UploadedFile() file: Express.Multer.File) {
+    try {
+      if (!file) {
+        throw new BadRequestException('No file uploaded');
+      }
+      const allowedMimeTypes = ['text/plain'];
+      const fileExtension = file.originalname.split('.').pop();
+      const fileMimeType = mimeTypes.lookup(fileExtension);
+      if (!fileMimeType || !allowedMimeTypes.includes(fileMimeType)) {
+        throw new BadRequestException(
+          'Invalid file type. Only text files are allowed.',
+        );
+      }
+      const parseFileResult =
+        await this.todoService.readLogFileAndDumpIntoDB(file);
+      return {
+        message: 'File content read successfully',
+        content: parseFileResult,
+      };
+    } catch (error) {
+      throw new BadRequestException(error);
     }
   }
 
@@ -100,6 +133,4 @@ export class TodoController {
       );
     }
   }
-
-
 }
