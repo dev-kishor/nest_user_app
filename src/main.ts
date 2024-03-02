@@ -20,7 +20,14 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.useGlobalPipes(new ValidationPipe({}));
+  app.useGlobalPipes(
+    // this will not throw error and will not allow to excute end point if anyone try to end extra payload from request
+    new ValidationPipe({
+      transform: true,
+      whitelist:true,
+      forbidNonWhitelisted:true
+    }),
+  );
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalFilters(new ValidationExceptionFilter());
 

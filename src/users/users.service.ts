@@ -1,14 +1,23 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { IUser } from './interface/users.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schema/users.schema';
-
+import { LoginDto } from './dto/login.dto';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    private jwtService: JwtService,
   ) {}
   async create(createUserDto: CreateUserDto): Promise<IUser> {
     try {
@@ -25,38 +34,7 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<IUser[]> {
-    try {
-      const allUser = await this.userModel.find({});
-      return allUser;
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  async findOne(id: string): Promise<IUser> {
-    try {
-      const userById = await this.userModel.findById(id);
-      return userById;
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  async passwordUpdate(id: string, password: string): Promise<IUser> {
-    try {
-      const userById = await this.userModel.findByIdAndUpdate(
-        id,
-        { password },
-        { returnOriginal: false },
-      );
-      return userById;
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  private async checkUserByEmail(email: string): Promise<IUser | null> {
+  private async checkUserByEmail(email: string): Promise<any | null> {
     try {
       const checkUser = await this.userModel.findOne({ email });
       return checkUser;
@@ -68,4 +46,27 @@ export class UsersService {
       );
     }
   }
+
+  async sigin(loginDto: LoginDto): Promise<{ access_token: string }> {
+    const { email, password } = loginDto;
+    try {
+      const userByEmail = await this.checkUserByEmail(email);
+      if (!userByEmail) {
+        throw new NotFoundException('user not found');
+      }
+      const passwordMatch = await bcrypt.compare(
+        password,
+        userByEmail.password,
+      );
+      if (!passwordMatch) {
+        throw new UnauthorizedException();
+      }
+      const payload = { id: userByEmail._id, username: userByEmail.email };
+      const access_token = await this.jwtService.signAsync(payload);
+      return { access_token };
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
 }

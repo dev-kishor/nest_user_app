@@ -7,55 +7,41 @@ import {
   Param,
   HttpException,
   HttpStatus,
+  ValidationPipe,
+  UsePipes,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
 import { IUser } from './interface/users.interface';
 import { ApiTags } from '@nestjs/swagger';
+import * as bcrypt from 'bcrypt';
+import { LoginDto } from './dto/login.dto';
 
-@ApiTags("Controller_Users")
-@Controller('users')
+@ApiTags('Controller_Auth')
+@Controller('auth')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto): Promise<IUser> {
+  @Post('/signup')
+  async create(@Body() createUserDto: CreateUserDto): Promise<IUser> {
+    const { password, email, name } = createUserDto;
     try {
-      return this.usersService.create(createUserDto);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
+      const userPayload = { ...createUserDto, password: hashedPassword };
+      await this.usersService.create(userPayload);
+      return { password, email, name };
     } catch (error) {
       throw new HttpException('error', HttpStatus.BAD_REQUEST);
     }
   }
 
-  @Get()
-  findAll():Promise<IUser[]> {
+  @Post('/login')
+  login(@Body() loginDto: LoginDto): Promise<{access_token:string}> {    
+    const { email, password } = loginDto;
     try {
-      return this.usersService.findAll();
-    } catch (error) {
-      throw new HttpException('error', HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string):Promise<IUser> {
-    try {
-      return this.usersService.findOne(id);
-    } catch (error) {
-      throw new HttpException('error', HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @Patch('/change-password/:id')
-  update(
-    @Param('id') id: string,
-    @Body() UpdateUserPasswordDto: UpdateUserPasswordDto,
-  ) {
-    const { password } = UpdateUserPasswordDto;
-    try {
-      if (password) {
-        return this.usersService.passwordUpdate(id, password);
-      }
+      return this.usersService.sigin({ email, password });
     } catch (error) {
       throw new HttpException('error', HttpStatus.BAD_REQUEST);
     }
