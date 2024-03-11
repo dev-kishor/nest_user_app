@@ -18,8 +18,8 @@ import { ApiTags } from '@nestjs/swagger';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 
-@ApiTags('Controller_Auth')
-@Controller('auth')
+@ApiTags('Controller_User')
+@Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -37,13 +37,13 @@ export class UsersController {
     }
   }
 
-  @Post('/login')
-  login(@Body() loginDto: LoginDto): Promise<{access_token:string}> {    
-    const { email, password } = loginDto;
-    try {
-      return this.usersService.sigin({ email, password });
-    } catch (error) {
-      throw new HttpException('error', HttpStatus.BAD_REQUEST);
-    }
-  }
+  // @Post('/login')
+  // login(@Body() loginDto: LoginDto): Promise<{access_token:string}> {    
+  //   const { email, password } = loginDto;
+  //   try {
+  //     return this.usersService.sigin({ email, password });
+  //   } catch (error) {
+  //     throw new HttpException('error', HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 }

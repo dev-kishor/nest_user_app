@@ -17,7 +17,6 @@ import { JwtService } from '@nestjs/jwt';
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    private jwtService: JwtService,
   ) {}
   async create(createUserDto: CreateUserDto): Promise<IUser> {
     try {
@@ -34,9 +33,9 @@ export class UsersService {
     }
   }
 
-  private async checkUserByEmail(email: string): Promise<any | null> {
+   async checkUserByEmail(email: string): Promise<any | null> {
     try {
-      const checkUser = await this.userModel.findOne({ email });
+      const checkUser = await this.userModel.findOne({ email }).exec();
       return checkUser;
     } catch (error) {
       console.error('Error checking user by email:', error);
@@ -47,26 +46,26 @@ export class UsersService {
     }
   }
 
-  async sigin(loginDto: LoginDto): Promise<{ access_token: string }> {
-    const { email, password } = loginDto;
-    try {
-      const userByEmail = await this.checkUserByEmail(email);
-      if (!userByEmail) {
-        throw new NotFoundException('user not found');
-      }
-      const passwordMatch = await bcrypt.compare(
-        password,
-        userByEmail.password,
-      );
-      if (!passwordMatch) {
-        throw new UnauthorizedException();
-      }
-      const payload = { id: userByEmail._id, username: userByEmail.email };
-      const access_token = await this.jwtService.signAsync(payload);
-      return { access_token };
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
-    }
-  }
+  // async sigin(loginDto: LoginDto): Promise<{ access_token: string }> {
+  //   const { email, password } = loginDto;
+  //   try {
+  //     const userByEmail = await this.checkUserByEmail(email);
+  //     if (!userByEmail) {
+  //       throw new NotFoundException('user not found');
+  //     }
+  //     const passwordMatch = await bcrypt.compare(
+  //       password,
+  //       userByEmail.password,
+  //     );
+  //     if (!passwordMatch) {
+  //       throw new UnauthorizedException();
+  //     }
+  //     const payload = { id: userByEmail._id, username: userByEmail.email };
+  //     const access_token = await this.jwtService.signAsync(payload);
+  //     return { access_token };
+  //   } catch (error) {
+  //     throw new HttpException(error, HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 
 }

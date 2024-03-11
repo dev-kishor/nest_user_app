@@ -11,18 +11,22 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { ConfigService } from '@nestjs/config';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import * as path from 'path';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import * as mimeTypes from 'mime-types';
+// import { AuthGuard } from 'src/auth/auth. guard';
 
 @ApiTags('Controller_Todo')
+@ApiBearerAuth("access-token")
 @Controller('/todo')
 export class TodoController {
   constructor(
@@ -48,7 +52,7 @@ export class TodoController {
       );
     }
   }
-
+  
   @Post('read-all-logs')
   @UseInterceptors(FileInterceptor('file'))
   async uploadLogFile(@UploadedFile() file: Express.Multer.File) {
@@ -90,9 +94,10 @@ export class TodoController {
       );
     }
   }
-
-  @Get()
-  findAll() {
+  
+  @Get("")
+  // @UseGuards(AuthGuard)
+  findAll(@Request() req:any) {
     return this.todoService.findAll();
   }
 

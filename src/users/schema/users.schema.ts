@@ -27,10 +27,6 @@ export class User {
   @Prop({ type: Boolean, default: true })
   isActive: boolean;
 
-  @Prop({
-    type: [todoIdSchema],
-  })
-  todoIds: todoIdSchema[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -160,7 +160,7 @@ export class TodoService {
       if (!user) {
         throw new Error(`User not found with id ${userId}`);
       }
-      user.todoIds.push(todoId);
+      // user.todoIds.push(todoId);
       await user.save();
     } catch (error) {
       throw new Error(`Failed ${error}`);
