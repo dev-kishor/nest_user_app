@@ -1,18 +1,14 @@
 import {
   HttpException,
   HttpStatus,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
+  Injectable
 } from '@nestjs/common';
+import { User, UserDocument } from './schema/users.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { IUser } from './interface/users.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User, UserDocument } from './schema/users.schema';
-import { LoginDto } from './dto/login.dto';
-import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -45,27 +41,4 @@ export class UsersService {
       );
     }
   }
-
-  // async sigin(loginDto: LoginDto): Promise<{ access_token: string }> {
-  //   const { email, password } = loginDto;
-  //   try {
-  //     const userByEmail = await this.checkUserByEmail(email);
-  //     if (!userByEmail) {
-  //       throw new NotFoundException('user not found');
-  //     }
-  //     const passwordMatch = await bcrypt.compare(
-  //       password,
-  //       userByEmail.password,
-  //     );
-  //     if (!passwordMatch) {
-  //       throw new UnauthorizedException();
-  //     }
-  //     const payload = { id: userByEmail._id, username: userByEmail.email };
-  //     const access_token = await this.jwtService.signAsync(payload);
-  //     return { access_token };
-  //   } catch (error) {
-  //     throw new HttpException(error, HttpStatus.BAD_REQUEST);
-  //   }
-  // }
-
 }

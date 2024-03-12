@@ -26,7 +26,7 @@ import * as mimeTypes from 'mime-types';
 // import { AuthGuard } from 'src/auth/auth. guard';
 
 @ApiTags('Controller_Todo')
-@ApiBearerAuth("access-token")
+// @ApiBearerAuth("access-token")
 @Controller('/todo')
 export class TodoController {
   constructor(

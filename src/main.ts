@@ -12,7 +12,7 @@ async function bootstrap() {
 
   // ======== Swagger Implementation ========
   const document = SwaggerModule.createDocument(app, documentConfig);
-  SwaggerModule.setup('api', app, document)
+  SwaggerModule.setup('api', app, document);
   // ======== Swagger Implementation ========
 
   app.enableCors({
@@ -24,12 +24,13 @@ async function bootstrap() {
     // this will not throw error and will not allow to excute end point if anyone try to end extra payload from request
     new ValidationPipe({
       transform: true,
-      whitelist:true,
-      forbidNonWhitelisted:true
+      whitelist: true,
+      forbidNonWhitelisted: true,
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalFilters(new ValidationExceptionFilter());
+  // app.use(cook)
 
   // PreFix to all api endpoint means all point will start with localhost:port/api/vi
   // app.setGlobalPrefix('api/v1');

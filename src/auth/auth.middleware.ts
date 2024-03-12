@@ -27,7 +27,8 @@ export class AuthMiddleware implements NestMiddleware {
   }
 
   private extractToken(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    // const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    const [str,token] = request.headers.cookie?.split('=') ?? [];
+    return str === 'access_token' ? token : undefined;
   }
 }
