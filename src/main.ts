@@ -10,33 +10,35 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // PreFix to all api endpoint means all point will start with localhost:port/api/vi
+  app.setGlobalPrefix('api/v1');
+
   // ======== Swagger Implementation ========
   const document = SwaggerModule.createDocument(app, documentConfig);
   SwaggerModule.setup('api', app, document);
   // ======== Swagger Implementation ========
 
   app.enableCors({
-    origin: 'http://localhost:3001',
+    origin: 'http://localhost:3000',
     credentials: true,
   });
 
+  // ======== this will throw error and will not allow to excute end point if anyone try to send extra payload from request ========
   app.useGlobalPipes(
-    // this will not throw error and will not allow to excute end point if anyone try to end extra payload from request
     new ValidationPipe({
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
     }),
   );
+  // ======== this will throw error and will not allow to excute end point if anyone try to send extra payload from request ========
+
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalFilters(new ValidationExceptionFilter());
-  // app.use(cook)
-
-  // PreFix to all api endpoint means all point will start with localhost:port/api/vi
-  // app.setGlobalPrefix('api/v1');
 
   const configService = app.get(ConfigService);
   const port: number = configService.get<number>('PORT', 8080);
   await app.listen(port);
 }
+
 bootstrap();

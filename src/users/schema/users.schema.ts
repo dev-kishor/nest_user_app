@@ -24,6 +24,9 @@ export class User {
   @Prop()
   password: string;
 
+  @Prop()
+  mobile:string
+
   @Prop({ type: Boolean, default: true })
   isActive: boolean;
 

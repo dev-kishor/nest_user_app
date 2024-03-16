@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Post, Res } from '@nestjs/common';
 import { LoginDto } from 'src/users/dto/login.dto';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -16,9 +16,17 @@ export class AuthController {
         loginDto.password,
       );
       const token_str = Object.values(authToken)[0];
-      return res.cookie('access_token', token_str,{httpOnly:true}).send(token_str);
+      return res
+        .cookie('access_token', token_str, { httpOnly: true })
+        .send(token_str);
     } catch (error) {
-      console.log(error);
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error,
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
   }
 }

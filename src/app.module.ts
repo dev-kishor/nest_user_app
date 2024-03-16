@@ -7,7 +7,6 @@ import {
   DBLoggerService,
   LoggerSchema,
 } from './common/services/dblogger.service';
-import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './auth/auth.middleware';
 
 @Module({
@@ -19,7 +18,6 @@ import { AuthMiddleware } from './auth/auth.middleware';
       isGlobal: true,
     }),
     MongooseModule.forRoot('mongodb://localhost:27017/user'),
-    AuthModule,
   ],
   providers: [DBLoggerService],
 })
@@ -27,9 +25,12 @@ export class AppModule implements NestModule{
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware)
-      .exclude({path:"auth",method:RequestMethod.POST})
+      .exclude(
+        { path: 'auth', method: RequestMethod.POST },
+        { path: 'user/signup', method: RequestMethod.POST } // Exclude signup route
+      )
       .forRoutes('*');
-  }
+}
   constructor(private readonly loggerService: DBLoggerService) {
     mongoose.set('debug', (collectionName, methodName, query, doc) => {
       const json_query = JSON.stringify(query);

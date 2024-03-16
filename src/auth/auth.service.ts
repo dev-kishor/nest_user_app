@@ -15,7 +15,7 @@ export class AuthService {
   ): Promise<{ access_token: string }> {
     const user = await this.userService.checkUserByEmail(username);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException("User not found");
     }
     const loggedUser = { ...user._doc };
     delete loggedUser.password;
