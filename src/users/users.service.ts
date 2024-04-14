@@ -1,20 +1,23 @@
 import {
   HttpException,
   HttpStatus,
-  Injectable
+  Inject,
+  Injectable,
+  Scope,
 } from '@nestjs/common';
 import { User, UserDocument } from './schema/users.schema';
 import { CreateUserDto } from './dto/create-user.dto';
-import { IUser } from './interface/users.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { REQUEST } from '@nestjs/core';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @Inject(REQUEST) private readonly requestObject: any,
   ) {}
-  async create(createUserDto: CreateUserDto): Promise<IUser> {
+  async create(createUserDto: CreateUserDto): Promise<any> {
     try {
       const checkEmail = await this.checkUserByEmail(createUserDto.email);
       if (checkEmail) {
@@ -29,7 +32,7 @@ export class UsersService {
     }
   }
 
-   async checkUserByEmail(email: string): Promise<any | null> {
+  async checkUserByEmail(email: string): Promise<any | null> {
     try {
       const checkUser = await this.userModel.findOne({ email }).exec();
       return checkUser;
@@ -39,6 +42,18 @@ export class UsersService {
         'Error checking user by email',
         HttpStatus.BAD_REQUEST,
       );
+    }
+  }
+
+  async getAllUserS() {
+    const current_logged_user = this.requestObject.user.loggedUser;
+    try {
+      return await this.userModel.find({
+        _id: { $ne: current_logged_user._id },
+      });
+
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
 }

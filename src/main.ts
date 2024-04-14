@@ -1,17 +1,20 @@
-import { ValidationExceptionFilter } from './filter/validation-exception.filter';
-import { HttpExceptionFilter } from './filter/http-exception.filter';
+import { AppModule } from './app.module';
+import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
 import { documentConfig } from './config-codes';
-import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './filter/http-exception.filter';
+import { ValidationExceptionFilter } from './filter/validation-exception.filter';
+import { ResponseInterceptor } from './interceptor/response/response.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {});
 
   // PreFix to all api endpoint means all point will start with localhost:port/api/vi
   app.setGlobalPrefix('api/v1');
+
+  app.useGlobalInterceptors(new ResponseInterceptor());
 
   // ======== Swagger Implementation ========
   const document = SwaggerModule.createDocument(app, documentConfig);

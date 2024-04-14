@@ -13,7 +13,7 @@ export class AuthMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const token = this.extractToken(req);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException("token not found");
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {

@@ -8,10 +8,12 @@ import {
   LoggerSchema,
 } from './common/services/dblogger.service';
 import { AuthMiddleware } from './auth/auth.middleware';
+import { GlobalModule } from './global/global.module';
 
 @Module({
   imports: [
     MasterModule,
+    GlobalModule,
     MongooseModule.forFeature([{ name: 'dblogs', schema: LoggerSchema }]),
     ConfigModule.forRoot({
       envFilePath: [`.env.${process.env.NODE_ENV || 'local'}`],

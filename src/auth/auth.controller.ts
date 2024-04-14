@@ -29,4 +29,15 @@ export class AuthController {
       );
     }
   }
+
+  @Post("logout")
+  async sigout(@Res() res){
+    try {
+    // TO_DO i'll go to user schema and delete the acces token from there
+    // const logout =  this.authService.signOut()
+    res.clearCookie("access_token").send();
+    } catch (error) {
+      
+    }
+  }
 }

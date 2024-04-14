@@ -4,10 +4,7 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class DBLoggerService {
-  constructor(
-    @InjectModel('dblogs') private readonly logModel: Model<void>,
-    // @InjectModel('programs') private readonly programModel: Model<any>,
-  ) {}
+  constructor(@InjectModel('dblogs') private readonly logModel: Model<void>) {}
 
   async saveLoges(
     collectionName: string,
@@ -16,11 +13,21 @@ export class DBLoggerService {
     doc: string,
     raw: string,
   ): Promise<any> {
-    // const all_program = await this.programModel.find({});
-    // console.log(all_program);
-
     console.log(collectionName, methodName, query, doc, raw);
     return;
+    try {
+      if (this.isInternalLog(collectionName, methodName)) {
+        await this.logModel.create({
+          collectionName,
+          methodName,
+          query,
+          doc,
+          raw,
+        });
+      }
+    } catch (error) {
+      console.error('Error saving debug information:', error);
+    }
   }
 
   private isInternalLog(collectionName: string, methodName: string): boolean {
